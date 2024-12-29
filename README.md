@@ -5,9 +5,10 @@ simple .py script to show the top 10x journactl errors for linux
 download `top_errors.py`
 
 `chmod +x top_errors.py`
+
 `./top_errors.py`
 
-Output:
+### Output:
 ```
 user@lt-fedora-ws:~/Projects/top_errors$ ./top_errors.py 
 Top 10 most frequent error/warning messages:
