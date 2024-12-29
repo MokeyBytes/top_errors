@@ -1,4 +1,4 @@
-# Journalctl Log Analyzer
+# top_errors, a Journalctl Log Analyzer
 
 This Python script parses system logs (`journalctl`) to identify repeated error, failure, or warning messages. It highlights the top 10 most frequent entries, making troubleshooting easier by focusing on recurring issues.
 
