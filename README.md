@@ -38,25 +38,28 @@ It color-codes the output for easier reading and displays the top 10 repeated lo
 
     Make the script executable (optional):
 
+```
 chmod +x parse_journal.py
+```
 
 (Optional) Create a virtual environment if you want to isolate dependencies:
-
+```
     python3 -m venv venv
     source venv/bin/activate
+```
 
-    No additional Python dependencies are required for this script, so this step is entirely optional.
+No additional Python dependencies are required for this script, so this step is entirely optional.
 
-Usage
+## Usage
 
 Run the script directly:
-
+```
 python3 parse_journal.py
-
+```
 Or if you made it executable:
-
+```
 ./parse_journal.py
-
+```
 Output example (if errors/warnings/fail messages exist):
 
 Top 10 most frequent error/warning messages:
