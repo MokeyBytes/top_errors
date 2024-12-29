@@ -1,110 +1,127 @@
-# Journalctl Parser
+# Journalctl Log Analyzer
 
-A simple Python script to parse systemd (journalctl) logs for repeated error/fail/warning messages.  
-It color-codes the output for easier reading and displays the top 10 repeated log lines.
+This Python script parses system logs (`journalctl`) to identify repeated error, failure, or warning messages. It highlights the top 10 most frequent entries, making troubleshooting easier by focusing on recurring issues.
 
-> **Why use this script?**  
-> - Quickly identify and count the most frequent errors or warnings in your system logs.  
-> - Speed up troubleshooting by focusing on the messages that matter.  
-> - Works out-of-the-box on most Linux distributions that use `systemd`.
+## Features
 
----
-
-## Table of Contents
-1. [Requirements](#requirements)
-2. [Installation](#installation)
-3. [Usage](#usage)
-4. [How It Works](#how-it-works)
-5. [Customization](#customization)
-6. [License](#license)
+- Fetches logs from the current system boot.
+- Identifies and counts occurrences of keywords (`error`, `fail`, `warning`).
+- Outputs results color-coded for easier readability:
+  - **Red** for `error` and `fail` messages.
+  - **Yellow** for `warning` messages.
 
 ---
 
 ## Requirements
 
-- **Python 3** (script uses `#!/usr/bin/env python3`)
-- **systemd** (the script relies on `journalctl`)
-- A Linux distribution with `journalctl` available (e.g., Ubuntu, Debian, Fedora, Arch)
+- **Python 3**
+- A Linux distribution that uses **systemd** (and supports `journalctl`).
+- Basic system permissions to access system logs.
 
 ---
 
-## Installation
+## Tutorial
 
-1. **Clone or Download** this repository:
+### 1. Clone the Repository
 
-   ```bash
-   git clone https://github.com/your-username/top_errors.git
-   cd top_errors
-
-    Make the script executable (optional):
-
-```
-chmod +x parse_journal.py
+```bash
+git clone https://github.com/your-username/journalctl-log-analyzer.git
+cd journalctl-log-analyzer
 ```
 
-(Optional) Create a virtual environment if you want to isolate dependencies:
-```
-    python3 -m venv venv
-    source venv/bin/activate
+### 2. Make the Script Executable
+
+```bash
+chmod +x top_errors.py
 ```
 
-No additional Python dependencies are required for this script, so this step is entirely optional.
+### 3. Run the Script
 
-## Usage
+#### Basic Usage:
+```bash
+./top_errors.py
+```
 
-Run the script directly:
+#### Run with Python Directly:
+```bash
+python3 top_errors.py
 ```
-python3 parse_journal.py
-```
-Or if you made it executable:
-```
-./parse_journal.py
-```
-Output example (if errors/warnings/fail messages exist):
 
+#### To Access Restricted Logs:
+Run with `sudo` if necessary:
+```bash
+sudo ./top_errors.py
+```
+
+---
+
+## Example Output
+
+If the system logs contain relevant messages, you will see something like this:
+
+```
 Top 10 most frequent error/warning messages:
 
-(5x) [red text] Some error message
-(3x) [red text] Another failure message
-(2x) [yellow text] A warning message
+(12x) [91mFailed to start NetworkManager.service.[0m
+(8x) [91mError: Disk quota exceeded.[0m
+(5x) [93mWarning: CPU temperature high.[0m
+(3x) [91mUnable to fetch updates.[0m
+```
 
-If no relevant logs are found, the script will display:
+If no errors or warnings are found:
 
+```
 No errors/warnings found in journalctl logs.
+```
 
-How It Works
+---
 
-    Fetch logs from the current systemd boot using:
+## How It Works
 
-    journalctl -b --no-pager
+1. **Fetch Logs**: Uses the `journalctl` command to retrieve logs from the current system boot.
+2. **Filter Relevant Messages**: Searches for lines containing the keywords `error`, `fail`, or `warning` (case-insensitive).
+3. **Count Occurrences**: Counts the number of times each matching line appears.
+4. **Sort and Display**: Displays the top 10 most frequent messages, highlighting severity using ANSI color codes.
 
-    Filter lines for error, fail, or warning (case-insensitive).
-    Count occurrences of each matching line.
-    Sort them by frequency and display the top 10.
-    Color-code each line:
-        Red if it contains error or fail.
-        Yellow if it contains warning.
+---
 
-    Tip: If you want to capture older boots or more specific log levels, modify the journalctl command in the get_journal_lines function.
+## Customization
 
-Customization
+- **Change the Number of Messages Displayed**:  
+  Modify the following line in the script to adjust the number of displayed results:
+  ```python
+  most_common_errors = counter.most_common(10)
+  ```
 
-    Change the number of top messages:
-    Edit the line:
+- **Add More Keywords**:  
+  Extend the search pattern in the script:
+  ```python
+  pattern = re.compile(r"(error|fail|warning|critical|alert)", re.IGNORECASE)
+  ```
 
-most_common_errors = counter.most_common(10)
+- **Customize Colors**:  
+  Update the `colorize` function to use different ANSI color codes:
+  ```python
+  return f"\033[94m{line}\033[0m"  # Example: Blue for warnings
+  ```
 
-and replace 10 with the desired number.
+---
 
-Use different search terms:
-Update the pattern in main() to catch different or additional keywords:
+## Troubleshooting
 
-    pattern = re.compile(r"(error|fail|warning|critical)", re.IGNORECASE)
+- **`journalctl` Not Found**:
+  Ensure your system uses `systemd`. Non-systemd distributions are not supported.
 
-    Customize colors:
-    Inside the colorize function, you can replace \033[91m (red) or \033[93m (yellow) with other ANSI color codes.
+- **Permission Denied**:
+  Use `sudo` to access restricted logs.
 
-License
+---
 
-This project is distributed under the MIT License.
-Feel free to use, modify, and distribute this script as you see fit.
+## License
+
+This project is licensed under the [MIT License](LICENSE). Feel free to use, modify, and distribute it.
+
+---
+
+Happy troubleshooting!
+
