@@ -5,29 +5,30 @@ Displays the top 10 repeated lines, color-coded for easy viewing.
 """
 
 import subprocess
-import re
 import sys
 from collections import Counter
 
 def get_journal_lines():
     """
-    Fetch logs from the current boot using journalctl. 
-    If you want to limit logs further (e.g. only 'error' priority), 
-    adjust the journalctl command accordingly.
+    Fetch logs from the current boot using journalctl (streaming to reduce memory).
     """
-    # '-b' means logs from the current boot.
-    # '--no-pager' ensures it doesn't prompt for pagination.
     cmd = ["journalctl", "-b", "--no-pager"]
-    
     try:
-        output = subprocess.check_output(cmd, universal_newlines=True)
-        return output.splitlines()
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
     except FileNotFoundError:
         print("Error: journalctl not found on this system.")
         sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: Failed to run journalctl: {e}")
-        sys.exit(1)
+
+    try:
+        for line in proc.stdout:
+            yield line.rstrip("\n")
+    finally:
+        stderr = proc.stderr.read()
+        retcode = proc.wait()
+        if retcode != 0:
+            msg = stderr.strip() or f"journalctl exited with code {retcode}"
+            print(f"Error: Failed to run journalctl: {msg}")
+            sys.exit(1)
 
 def colorize(line):
     """
@@ -43,17 +44,17 @@ def colorize(line):
     else:
         # No color
         return line
+
 def main():
-    lines = get_journal_lines()
+    counter = Counter()
 
-    # Regex pattern to find lines containing 'error', 'fail', or 'warning' (case-insensitive)
-    pattern = re.compile(r"(error|fail|warning)", re.IGNORECASE)
+    # Faster than regex: simple substring checks on lowercase
+    for line in get_journal_lines():
+        stripped = line.strip()
+        lower = stripped.lower()
+        if ("error" in lower) or ("fail" in lower) or ("warning" in lower):
+            counter[stripped] += 1
 
-    # Filter lines
-    relevant_lines = [line.strip() for line in lines if pattern.search(line)]
-
-    # Count each repeated line
-    counter = Counter(relevant_lines)
     most_common_errors = counter.most_common(10)
 
     if not most_common_errors:
